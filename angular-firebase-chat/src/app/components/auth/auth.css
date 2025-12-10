@@ -1,0 +1,361 @@
+/* Contenedor principal que ocupa toda la pantalla */
+.auth-container {
+  /* Establecemos el alto mínimo a toda la ventana */
+  min-height: 100vh;
+  width: 100vw;
+
+  /* Usamos flexbox para centrar el contenido */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Agregamos padding para dispositivos móviles */
+  padding: 20px;
+
+  /* Posición fija para cubrir toda la pantalla */
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+
+  /* Gradiente de fondo atractivo */
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+  /* Aseguramos que el contenedor sea responsivo */
+  box-sizing: border-box;
+}
+
+/* Tarjeta principal de autenticación */
+.auth-card {
+  /* Definimos el ancho máximo y lo hacemos responsivo */
+  max-width: 450px;
+  width: 100%;
+
+  /* Fondo blanco con transparencia para efecto moderno */
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+
+  /* Bordes redondeados */
+  border-radius: 20px;
+
+  /* Sombra suave para profundidad */
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+
+  /* Espaciado interno */
+  padding: 40px 30px;
+
+  /* Animación suave al aparecer */
+  animation: slideUp 0.6s ease-out;
+
+  /* Borde sutil */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Animación de entrada de la tarjeta */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Sección del encabezado */
+.auth-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/* Icono/logo de la aplicación */
+.logo {
+  font-size: 60px;
+  margin-bottom: 15px;
+
+  /* Animación de rotación sutil */
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Título principal */
+.title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0 0 10px 0;
+
+  /* Gradiente en el texto */
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Subtítulo */
+.subtitle {
+  font-size: 16px;
+  color: #718096;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Contenido principal */
+.auth-content {
+  margin-bottom: 30px;
+}
+
+/* Sección de descripción */
+.description {
+  margin-bottom: 30px;
+}
+
+.description h2 {
+  font-size: 20px;
+  color: #2d3748;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+/* Lista de características */
+.features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.features-list li {
+  padding: 8px 0;
+  color: #4a5568;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Sección de acciones de autenticación */
+.auth-actions {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Botón principal de Google */
+.google-btn {
+  /* Tamaño y espaciado */
+  width: 100%;
+  padding: 15px 20px;
+
+  /* Eliminamos estilos por defecto del botón */
+  border: none;
+  border-radius: 12px;
+
+  /* Tipografía */
+  font-size: 16px;
+  font-weight: 600;
+
+  /* Colores */
+  background: #fff;
+  color: #2d3748;
+  border: 2px solid #e2e8f0;
+
+  /* Efectos visuales */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  /* Cursor y transiciones */
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  /* Flexbox para alinear contenido */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* Efectos hover del botón */
+.google-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  border-color: #cbd5e0;
+}
+
+/* Estado activo del botón */
+.google-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Estado deshabilitado */
+.google-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Estado de carga */
+.google-btn.loading {
+  pointer-events: none;
+}
+
+/* Icono de Google */
+.google-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Spinner de carga */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e2e8f0;
+  border-top: 2px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Texto del botón */
+.btn-text {
+  flex: 1;
+}
+
+/* Mensaje de error */
+.error-message {
+  margin-top: 15px;
+  padding: 12px;
+  background: #fed7d7;
+  color: #c53030;
+  border-radius: 8px;
+  font-size: 14px;
+  text-align: center;
+  border: 1px solid #feb2b2;
+}
+
+/* Sección de información */
+.info-section {
+  text-align: center;
+}
+
+.info-text {
+  font-size: 12px;
+  color: #a0aec0;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Footer del componente */
+.auth-footer {
+  text-align: center;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.auth-footer p {
+  margin: 0;
+  font-size: 14px;
+  color: #718096;
+}
+
+.auth-footer strong {
+  color: #4a5568;
+}
+
+.auth-footer small {
+  font-size: 12px;
+  color: #a0aec0;
+}
+
+/* Responsive design para móviles */
+@media (max-width: 480px) {
+  .auth-container {
+    padding: 15px;
+  }
+
+  .auth-card {
+    padding: 30px 20px;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .google-btn {
+    padding: 12px 16px;
+    font-size: 15px;
+  }
+
+  .features-list li {
+    font-size: 13px;
+  }
+}
+
+/* Tema oscuro (opcional) */
+@media (prefers-color-scheme: dark) {
+  .auth-card {
+    background: rgba(26, 32, 44, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .title {
+    color: #f7fafc;
+  }
+
+  .subtitle {
+    color: #a0aec0;
+  }
+
+  .description h2 {
+    color: #f7fafc;
+  }
+
+  .features-list li {
+    color: #cbd5e0;
+  }
+
+  .google-btn {
+    background: #2d3748;
+    color: #f7fafc;
+    border-color: #4a5568;
+  }
+
+  .google-btn:hover:not(:disabled) {
+    border-color: #718096;
+  }
+
+  .info-text {
+    color: #718096;
+  }
+
+  .auth-footer {
+    border-top-color: #4a5568;
+  }
+
+  .auth-footer p {
+    color: #a0aec0;
+  }
+
+  .auth-footer strong {
+    color: #e2e8f0;
+  }
+}
