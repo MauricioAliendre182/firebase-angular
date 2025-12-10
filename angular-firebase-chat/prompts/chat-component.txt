@@ -1,0 +1,10 @@
+Create an Angular 21 chat component for an AI assistant with the following functionality:
+
+Component structure: Injectable services for auth and chat, message model with type (user/assistant), content, timestamp, and status
+Chat features: Send messages on Enter, Shift+Enter for new lines, auto-scroll to newest messages, typing indicator when assistant responds, message history loading
+User interface: Header with user info and logout button, message list with user/assistant message styling, input textarea with send button, welcome message for empty chat
+State management: Loading states for history and sending, error handling with user feedback, disabled inputs during operations
+Message formatting: Support for basic markdown (bold/italic), timestamp display, error indicators for failed messages
+Authentication: User verification with redirect to auth if not logged in, user info display with avatar and fallback
+Additional features: Image error handling, message tracking for performance, custom input focus management
+Use modern design, TypeScript, standalone components, and reactive forms. Include proper lifecycle management and cleanup.
