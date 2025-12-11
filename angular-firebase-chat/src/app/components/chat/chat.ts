@@ -1,20 +1,29 @@
-import { Component, inject, OnInit, OnDestroy, ElementRef, AfterViewChecked, viewChild } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnInit,
+  OnDestroy,
+  ElementRef,
+  AfterViewChecked,
+  viewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth';
 import { ChatService } from '../../services/chat';
+import { User } from '../../models/user';
+import { ChatMessage } from '../../models/chat';
 // import { MensajeChat } from '../../models/chat';
 
 @Component({
   selector: 'app-chat',
   imports: [CommonModule, FormsModule],
   templateUrl: './chat.html',
-  styleUrl: './chat.css'
+  styleUrl: './chat.css',
 })
 export class Chat implements OnInit, OnDestroy, AfterViewChecked {
-
   private authService = inject(AuthService);
   private chatService = inject(ChatService);
   private router = inject(Router);
@@ -27,13 +36,13 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
   messagesContainer = viewChild<ElementRef<HTMLElement>>('messagesContainer');
   messageInput = viewChild<ElementRef<HTMLTextAreaElement>>('messageInput');
 
-  user: any = null;                    // Información del usuario actual
-  messages: any[] = [];                   // Lista de mensajes del chat
-  messageText = '';                     // Texto del mensaje que está escribiendo el usuario
-  sendingMessage = false;               // Indica si se está enviando un mensaje
-  assistantTyping = false;          // Indica si el asistente está generando una respuesta
-  loadingHistory = false;             // Indica si se está cargando el historial
-  messageError = '';                     // Mensaje de error para mostrar al usuario
+  user: User | null = null; // Información del usuario actual
+  messages: ChatMessage[] = []; // Lista de mensajes del chat
+  messageText = ''; // Texto del mensaje que está escribiendo el usuario
+  sendingMessage = false; // Indica si se está enviando un mensaje
+  assistantTyping = false; // Indica si el asistente está generando una respuesta
+  loadingHistory = false; // Indica si se está cargando el historial
+  messageError = ''; // Mensaje de error para mostrar al usuario
 
   private subscriptions: Subscription[] = [];
 
@@ -52,7 +61,7 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   ngOnDestroy(): void {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 
   /**
@@ -70,7 +79,14 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
     // this.usuario = this.authService.obtenerUsuarioActual();
 
     // Simulación de usuario autenticado para desarrollo
-    this.user = { uid: 'usuario123', nombre: 'Usuario de Prueba', fotoURL: '' };
+    this.user = {
+      uid: 'usuario123',
+      name: 'Usuario de Prueba',
+      photoUrl: '',
+      createdAt: new Date(),
+      lastConnection: new Date(),
+      email: 'usuario@ejemplo.com',
+    };
 
     if (!this.user) {
       await this.router.navigate(['/auth']);
@@ -89,7 +105,6 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
     } catch (error) {
       console.error('❌ Error upon initializing chat in component:', error);
       throw error;
-
     } finally {
       this.loadingHistory = false;
     }
@@ -101,7 +116,6 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
     //   this.mensajes = mensajes;
     //   this.debeHacerScroll = true;
     // });
-
     // // Suscribirse al estado del asistente
     // const subAsistente = this.chatService.asistenteRespondiendo$.subscribe(respondiendo => {
     //   this.asistenteEscribiendo = respondiendo;
@@ -109,10 +123,8 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
     //     this.debeHacerScroll = true;
     //   }
     // });
-
     // this.suscripciones.push(subMensajes, subAsistente);
   }
-
 
   async sendMessage(): Promise<void> {
     // Validamos que hay texto para enviar
@@ -134,7 +146,6 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
 
       // Hacemos focus en el input para continuar escribiendo
       this.focusInput();
-
     } catch (error: any) {
       console.error('❌ Error sending message:', error);
 
@@ -143,7 +154,6 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
 
       // Restauramos el texto en el input
       this.messageText = texto;
-
     } finally {
       this.sendingMessage = false;
     }
@@ -167,7 +177,6 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
 
       // Navegamos al login
       await this.router.navigate(['/auth']);
-
     } catch (error) {
       console.error('❌ Error logging out:', error);
       this.messageError = 'Error logging out';
@@ -185,18 +194,16 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
     }
   }
 
-
   private focusInput(): void {
     setTimeout(() => {
       this.messageInput()?.nativeElement?.focus();
     }, 100);
   }
 
-
   formatTime(date: Date): string {
     return date.toLocaleTimeString('es-ES', {
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   }
 
@@ -211,12 +218,12 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
       .replace(/\*(.*?)\*/g, '<em>$1</em>');
   }
 
-  trackByMessage(index: number, message: any): string {
+  trackByMessage(index: number, message: ChatMessage): string {
     return message.id || `${message.type}-${message.sentAt.getTime()}`;
   }
 
-
   imageErrorHandler(event: any): void {
-    event.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiM2NjdlZWEiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDEyQzE0LjIwOTEgMTIgMTYgMTAuMjA5MSAxNiA4QzE2IDUuNzkwODYgMTQuMjA5MSA0IDEyIDRDOS43OTA4NiA0IDggNS43OTA4NiA4IDhDOCAxMC4yMDkxIDkuNzkwODYgMTIgMTIgMTJaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMTIgMTRDOC42ODYyOSAxNCA2IDE2LjY4NjMgNiAyMEg2VjIySDZIMThINlYyMEM2IDE2LjY4NjMgMTUuMzEzNyAxNCAxMiAxNFoiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo8L3N2Zz4K';
+    event.target.src =
+      'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiM2NjdlZWEiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDEyQzE0LjIwOTEgMTIgMTYgMTAuMjA5MSAxNiA4QzE2IDUuNzkwODYgMTQuMjA5MSA0IDEyIDRDOS43OTA4NiA0IDggNS43OTA4NiA4IDhDOCAxMC4yMDkxIDkuNzkwODYgMTIgMTIgMTJaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMTIgMTRDOC42ODYyOSAxNCA2IDE2LjY4NjMgNiAyMEg2VjIySDZIMThINlYyMEM2IDE2LjY4NjMgMTUuMzEzNyAxNCAxMiAxNFoiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo8L3N2Zz4K';
   }
 }
