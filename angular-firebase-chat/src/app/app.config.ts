@@ -1,14 +1,13 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
-
 import { routes } from './app.routes';
 import { provideHttpClient } from '@angular/common/http';
-import { provideFirebaseApp } from '@angular/fire/app';
-import { initializeApp } from 'firebase/app';
-import { envrionment } from '../environments/environment.prod';
-import { provideAuth } from '@angular/fire/auth';
-import { getAuth } from 'firebase/auth';
+
+import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { getAuth, provideAuth } from '@angular/fire/auth';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
+
+import { envrionment } from '../environments/environment.prod';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -19,7 +18,7 @@ export const appConfig: ApplicationConfig = {
     // this function will contain our env variables
     // This is to use the DB Firebase services
     provideFirebaseApp(() => {
-      return initializeApp(envrionment.firebaseConfig)
+      return initializeApp(envrionment.firebaseConfig);
     }),
     // provideAuth is to use the Firebase Auth services
     // We need to pass a function that initializes the Auth service
@@ -32,6 +31,6 @@ export const appConfig: ApplicationConfig = {
       // We can initialize and return the Firestore instance associated with the default App
       // using getFirestore() from 'firebase/firestore'
       return getFirestore();
-    })
-  ]
+    }),
+  ],
 };

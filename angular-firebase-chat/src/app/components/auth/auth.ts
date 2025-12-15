@@ -22,13 +22,13 @@ export class Auth {
     this.authenticating = true;
 
     try {
-      // const user = await this.authService.iniciarSesionConGoogle();
+      const user = await this.authService.loginWithGoogle();
 
       // Simulation of authentication service call (replace with the above line in production)
-      let user = null;
-      user = await new Promise((resolve) => {
-        setTimeout(() => resolve({ nombre: 'Test user' }), 1000);
-      });
+      // let user = null;
+      // user = await new Promise((resolve) => {
+      //   setTimeout(() => resolve({ nombre: 'Test user' }), 1000);
+      // });
 
       if (user) {
         await this.router.navigate(['/chat']);
@@ -62,10 +62,10 @@ export class Auth {
   ngOnInit(): void {
     // Subscribe to authentication state changes
     // An observable could be used in AuthService to track authentication status
-    // this.authService.estaAutenticado$.subscribe(autenticado => {
-    //   if (autenticado) {
-    //     this.router.navigate(['/chat']);
-    //   }
-    // });
+    this.authService.isAuthenticated$.subscribe(authenticated => {
+      if (authenticated) {
+        this.router.navigate(['/chat']);
+      }
+    });
   }
 }

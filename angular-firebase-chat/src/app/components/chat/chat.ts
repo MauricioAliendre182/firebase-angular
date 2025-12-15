@@ -13,8 +13,9 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth';
 import { ChatService } from '../../services/chat';
-import { User } from '../../models/user';
+import { User as UserModel } from '../../models/user';
 import { ChatMessage } from '../../models/chat';
+import { User } from 'firebase/auth';
 // import { MensajeChat } from '../../models/chat';
 
 @Component({
@@ -52,7 +53,7 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
   async ngOnInit(): Promise<void> {
     try {
       await this.verificarAutenticacion();
-      await this.inicializarChat();
+      await this.startChat();
       this.configureSubscriptions();
     } catch (error) {
       console.error('❌ Error upon initializing chat:', error);
@@ -76,17 +77,17 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   private async verificarAutenticacion(): Promise<void> {
-    // this.usuario = this.authService.obtenerUsuarioActual();
+    this.user = this.authService.getCurrentUser();
 
     // Simulación de usuario autenticado para desarrollo
-    this.user = {
-      uid: 'usuario123',
-      name: 'Usuario de Prueba',
-      photoUrl: '',
-      createdAt: new Date(),
-      lastConnection: new Date(),
-      email: 'usuario@ejemplo.com',
-    };
+    // this.user = {
+    //   uid: 'usuario123',
+    //   name: 'Usuario de Prueba',
+    //   photoUrl: '',
+    //   createdAt: new Date(),
+    //   lastConnection: new Date(),
+    //   email: 'usuario@ejemplo.com',
+    // };
 
     if (!this.user) {
       await this.router.navigate(['/auth']);
@@ -94,7 +95,7 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
     }
   }
 
-  private async inicializarChat(): Promise<void> {
+  private async startChat(): Promise<void> {
     if (!this.user) return;
 
     this.loadingHistory = true;
@@ -173,7 +174,7 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
       // this.chatService.limpiarChat();
 
       // Cerramos sesión en Firebase
-      // await this.authService.cerrarSesion();
+      await this.authService.logout();
 
       // Navegamos al login
       await this.router.navigate(['/auth']);
