@@ -30,7 +30,7 @@
   <main class="chat-messages" #messagesContainer>
 
     <!-- Mensaje de bienvenida cuando no hay mensajes -->
-    @if (messages.length === 0 && !loadingHistory) {
+    @if (messages().length === 0 && !loadingHistory()) {
       <div class="welcome-message">
         <div class="welcome-content">
           <div class="welcome-icon">🤖</div>
@@ -42,7 +42,7 @@
     }
 
     <!-- Indicador de carga del historial -->
-    @if (loadingHistory) {
+    @if (loadingHistory()) {
       <div class="loading-history">
         <div class="loading-spinner"></div>
         <p>Loading your conversation history...</p>
@@ -51,7 +51,7 @@
 
     <!-- Lista de mensajes -->
     <div class="messages-list">
-      @for (message of messages; track trackByMessage($index, message)) {
+      @for (message of messages(); track trackByMessage($index, message)) {
         <div
           class="message-wrapper"
           [class.user-message]="message.type === 'user'"
@@ -89,7 +89,7 @@
       }
 
       <!-- Indicador de que el asistente está escribiendo -->
-      @if (assistantTyping) {
+      @if (assistantTyping()) {
         <div class="message-wrapper assistant-message">
           <div class="message assistant-msg typing">
             <div class="message-avatar">🤖</div>
@@ -119,7 +119,7 @@
           name="message"
           placeholder="Write message here... (press Enter to send, Shift+Enter for new line)"
           class="message-input"
-          [disabled]="sendingMessage || assistantTyping"
+          [disabled]="sendingMessage() || assistantTyping()"
           (keydown)="handleKeyPress($event)"
           rows="1">
         </textarea>
@@ -127,14 +127,14 @@
         <button
           type="submit"
           class="send-btn"
-          [disabled]="!messageText.trim() || sendingMessage || assistantTyping"
-          [class.sending]="sendingMessage">
+          [disabled]="!messageText.trim() || sendingMessage() || assistantTyping()"
+          [class.sending]="sendingMessage()">
 
           <!-- Icono de envío o spinner -->
-          @if (!sendingMessage) {
+          @if (!sendingMessage()) {
             <span>></span>
           }
-          @if (sendingMessage) {
+          @if (sendingMessage()) {
             <span class="sending-spinner"></span>
           }
         </button>

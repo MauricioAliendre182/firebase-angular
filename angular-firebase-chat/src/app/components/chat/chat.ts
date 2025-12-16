@@ -6,6 +6,7 @@ import {
   ElementRef,
   AfterViewChecked,
   viewChild,
+  signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -13,10 +14,8 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth';
 import { ChatService } from '../../services/chat';
-import { User as UserModel } from '../../models/user';
 import { ChatMessage } from '../../models/chat';
 import { User } from 'firebase/auth';
-// import { MensajeChat } from '../../models/chat';
 
 @Component({
   selector: 'app-chat',
@@ -33,16 +32,16 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
   // @ViewChild('messagesContainer') messagesContainer!: ElementRef;
   // @ViewChild('messageInput') messageInput!: ElementRef;
 
-  // We can do this using signals in Angular 16+
-  messagesContainer = viewChild<ElementRef<HTMLElement>>('messagesContainer');
-  messageInput = viewChild<ElementRef<HTMLTextAreaElement>>('messageInput');
+  // Using viewChild signals (Angular 17+)
+  messagesContainer = viewChild<ElementRef>('messagesContainer');
+  messageInput = viewChild<ElementRef>('messageInput');
 
   user: User | null = null; // Información del usuario actual
-  messages: ChatMessage[] = []; // Lista de mensajes del chat
+  messages = signal<ChatMessage[]>([]); // Lista de mensajes del chat (signal)
   messageText = ''; // Texto del mensaje que está escribiendo el usuario
-  sendingMessage = false; // Indica si se está enviando un mensaje
-  assistantTyping = false; // Indica si el asistente está generando una respuesta
-  loadingHistory = false; // Indica si se está cargando el historial
+  sendingMessage = signal(false); // Indica si se está enviando un mensaje (signal)
+  assistantTyping = signal(false); // Indica si el asistente está generando una respuesta (signal)
+  loadingHistory = signal(false); // Indica si se está cargando el historial (signal)
   messageError = ''; // Mensaje de error para mostrar al usuario
 
   private subscriptions: Subscription[] = [];
@@ -56,7 +55,7 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
       await this.startChat();
       this.configureSubscriptions();
     } catch (error) {
-      console.error('❌ Error upon initializing chat:', error);
+      console.error('❌ Error initializing chat:', error);
       this.messageError = 'Error loading chat. Please try reloading the page.';
     }
   }
@@ -98,7 +97,7 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
   private async startChat(): Promise<void> {
     if (!this.user) return;
 
-    this.loadingHistory = true;
+    this.loadingHistory.set(true);
 
     try {
       // Inicializamos el chat con el ID del usuario
@@ -107,19 +106,19 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
       console.error('❌ Error upon initializing chat in component:', error);
       throw error;
     } finally {
-      this.loadingHistory = false;
+      this.loadingHistory.set(false);
     }
   }
 
   private configureSubscriptions(): void {
     // Suscribirse a los mensajes del chat
     const subMessages = this.chatService.messages$.subscribe(messages => {
-      this.messages = messages;
+      this.messages.set(messages);
       this.mustDoScroll = true;
     });
     // Suscribirse al estado del asistente
     const subAssistant = this.chatService.assistantResponding$.subscribe(responding => {
-      this.assistantTyping = responding;
+      this.assistantTyping.set(responding);
       if (responding) {
         this.mustDoScroll = true;
       }
@@ -135,7 +134,7 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
 
     // Limpiamos errores previos
     this.messageError = '';
-    this.sendingMessage = true;
+    this.sendingMessage.set(true);
 
     // Guardamos el texto del mensaje y limpiamos el input
     const text = this.messageText.trim();
@@ -156,7 +155,7 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
       // Restauramos el texto en el input
       this.messageText = text;
     } finally {
-      this.sendingMessage = false;
+      this.sendingMessage.set(false);
     }
   }
 

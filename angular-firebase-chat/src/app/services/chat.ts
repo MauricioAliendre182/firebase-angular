@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { ChatMessage } from '../models/chat';
 import { BehaviorSubject, of } from 'rxjs';
 import { AuthService } from './auth';
+import { FirestoreService } from './firestore';
 
 const firestoreServiceMock = {
   getUserMessages: (userId: string) => of([]),
@@ -18,9 +19,9 @@ const geminiServiceMock = {
 })
 export class ChatService {
   private authService = inject(AuthService);
+  private firestoreService = inject(FirestoreService);
 
   // Todavía no implementados:
-  // private firestoreService = inject(FirestoreService);
   // private geminiService = inject(GeminiService);
 
   // BehaviorSubject para mantener la lista de mensajes del chat actual
@@ -44,34 +45,36 @@ export class ChatService {
     this.loadingHistory = true;
 
     try {
-      // this.firestoreService.obtenerMensajesUsuario(usuarioId).subscribe({
-      //   next: (mensajes) => {
-      //     // Actualizamos el BehaviorSubject con los mensajes obtenidos
-      //     this.mensajesSubject.next(mensajes);
-      //     this.cargandoHistorial = false;
-      //   },
-      //   error: (error) => {
-      //     console.error('❌ Error al cargar historial:', error);
-      //     this.cargandoHistorial = false;
-
-      //     // En caso de error, iniciamos con una lista vacía
-      //     this.mensajesSubject.next([]);
-      //   }
-      // });
-      // 🎭 Usando mock del FirestoreService
-      firestoreServiceMock.getUserMessages(userId).subscribe({
+      // Using real firstore service
+      this.firestoreService.getUserMessages(userId).subscribe({
         next: (messages) => {
           // Actualizamos el BehaviorSubject con los mensajes obtenidos
           this.subjectMessages.next(messages);
           this.loadingHistory = false;
         },
         error: (error) => {
-          console.error('❌ Error loading messages:', error);
+          console.error('❌ Error loading history:', error);
           this.loadingHistory = false;
+
           // En caso de error, iniciamos con una lista vacía
           this.subjectMessages.next([]);
-        },
+        }
       });
+
+      // 🎭 Usando mock del FirestoreService
+      // firestoreServiceMock.getUserMessages(userId).subscribe({
+      //   next: (messages) => {
+      //     // Actualizamos el BehaviorSubject con los mensajes obtenidos
+      //     this.subjectMessages.next(messages);
+      //     this.loadingHistory = false;
+      //   },
+      //   error: (error) => {
+      //     console.error('❌ Error loading messages:', error);
+      //     this.loadingHistory = false;
+      //     // En caso de error, iniciamos con una lista vacía
+      //     this.subjectMessages.next([]);
+      //   },
+      // });
     } catch (error) {
       console.error('❌ Error initializing chat:', error);
       this.loadingHistory = false;
@@ -111,8 +114,11 @@ export class ChatService {
 
       // DESPUÉS intentamos guardarlo en Firestore (en background)
       try {
-        // await this.firestoreService.guardarMensaje(mensajeUsuario);
-        await firestoreServiceMock.saveMessage(userMessage);
+        // This is the real service call
+        await this.firestoreService.saveMessage(userMessage);
+
+        // This is mocked version
+        // await firestoreServiceMock.saveMessage(userMessage);
       } catch (firestoreError) {
         // El mensaje ya está visible, así que continuamos
       }
@@ -127,7 +133,7 @@ export class ChatService {
       // Solo tomamos los últimos 6 mensajes para no exceder límites de tokens
       // Esto deja más espacio para respuestas más completas
 
-      // const historialParaGemini = this.geminiService.convertirHistorialAGemini(
+      // const geminiHistory = this.geminiService.convertirHistorialAGemini(
       //   mensajesActuales.slice(-6)
       // );
 
@@ -137,7 +143,7 @@ export class ChatService {
       );
 
       // Enviamos el mensaje a ChatGPT y esperamos la respuesta (usando mock)
-      // const respuestaAsistente = await firstValueFrom(
+      // const assistantResponse = await firstValueFrom(
       //   this.geminiService.enviarMensaje(contenidoMensaje, historialParaGemini)
       // );
 
@@ -173,8 +179,11 @@ export class ChatService {
 
       // DESPUÉS intentamos guardar en Firestore ya con la respuesta de Gemini incluida (en background)
       try {
-        // await this.firestoreService.guardarMensaje(mensajeAsistente);
-        await firestoreServiceMock.saveMessage(assistantMessage);
+        // This is the real service call
+        await this.firestoreService.saveMessage(assistantMessage);
+
+        // This is mocked version
+        // await firestoreServiceMock.saveMessage(assistantMessage);
       } catch (firestoreError) {
         // El mensaje ya está visible, así que no es crítico
       }

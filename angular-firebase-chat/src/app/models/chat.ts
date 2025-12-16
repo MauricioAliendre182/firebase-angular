@@ -7,7 +7,7 @@ export interface ChatMessage {
   status?: 'sending' | 'sent' | 'error' | 'temporary';
 }
 
-export interface ConversacionChat {
+export interface ChatConversation {
   id?: string;
   userId: string;
   messages: ChatMessage[];

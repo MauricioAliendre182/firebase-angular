@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { AuthService } from '../../services/auth';
@@ -14,12 +14,12 @@ export class Auth {
 
   private authService = inject(AuthService);
   private router = inject(Router);
-  authenticating = false;
-  errorMessage = '';
+  authenticating = signal(false);
+  errorMessage = signal('');
 
   async loginWithGoogle(): Promise<void> {
-    this.errorMessage = '';
-    this.authenticating = true;
+    this.errorMessage.set('');
+    this.authenticating.set(true);
 
     try {
       const user = await this.authService.loginWithGoogle();
@@ -34,7 +34,7 @@ export class Auth {
         await this.router.navigate(['/chat']);
 
       } else {
-        this.errorMessage = 'Could not retrieve user information';
+        this.errorMessage.set('Could not retrieve user information');
         console.error('❌ No user information obtained');
       }
 
@@ -45,17 +45,17 @@ export class Auth {
       // in this case code is a string like 'auth/popup-closed-by-user'
       // which means the user closed the popup without completing the sign-in
       if (error.code === 'auth/popup-closed-by-user') {
-        this.errorMessage = 'You have closed the authentication window. Please try again.';
+        this.errorMessage.set('You have closed the authentication window. Please try again.');
       } else if (error.code === 'auth/popup-blocked') {
-        this.errorMessage = 'Your browser blocked the authentication window. Please allow popups and try again.';
+        this.errorMessage.set('Your browser blocked the authentication window. Please allow popups and try again.');
       } else if (error.code === 'auth/network-request-failed') {
-        this.errorMessage = 'Connection error. Please check your internet and try again.';
+        this.errorMessage.set('Connection error. Please check your internet and try again.');
       } else {
-        this.errorMessage = 'Error starting session. Please try again.';
+        this.errorMessage.set('Error starting session. Please try again.');
       }
 
     } finally {
-      this.authenticating = false;
+      this.authenticating.set(false);
     }
   }
 
