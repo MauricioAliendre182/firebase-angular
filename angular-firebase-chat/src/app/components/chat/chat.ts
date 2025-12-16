@@ -102,7 +102,7 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
 
     try {
       // Inicializamos el chat con el ID del usuario
-      // await this.chatService.inicializarChat(this.user.uid);
+      await this.chatService.initializeChat(this.user.uid);
     } catch (error) {
       console.error('❌ Error upon initializing chat in component:', error);
       throw error;
@@ -113,18 +113,18 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
 
   private configureSubscriptions(): void {
     // Suscribirse a los mensajes del chat
-    // const subMensajes = this.chatService.mensajes$.subscribe(mensajes => {
-    //   this.mensajes = mensajes;
-    //   this.debeHacerScroll = true;
-    // });
-    // // Suscribirse al estado del asistente
-    // const subAsistente = this.chatService.asistenteRespondiendo$.subscribe(respondiendo => {
-    //   this.asistenteEscribiendo = respondiendo;
-    //   if (respondiendo) {
-    //     this.debeHacerScroll = true;
-    //   }
-    // });
-    // this.suscripciones.push(subMensajes, subAsistente);
+    const subMessages = this.chatService.messages$.subscribe(messages => {
+      this.messages = messages;
+      this.mustDoScroll = true;
+    });
+    // Suscribirse al estado del asistente
+    const subAssistant = this.chatService.assistantResponding$.subscribe(responding => {
+      this.assistantTyping = responding;
+      if (responding) {
+        this.mustDoScroll = true;
+      }
+    });
+    this.subscriptions.push(subMessages, subAssistant);
   }
 
   async sendMessage(): Promise<void> {
@@ -138,12 +138,12 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
     this.sendingMessage = true;
 
     // Guardamos el texto del mensaje y limpiamos el input
-    const texto = this.messageText.trim();
+    const text = this.messageText.trim();
     this.messageText = '';
 
     try {
       // Enviamos el mensaje usando el servicio de chat
-      // await this.chatService.enviarMensaje(texto);
+      await this.chatService.sendMessage(text);
 
       // Hacemos focus en el input para continuar escribiendo
       this.focusInput();
@@ -154,7 +154,7 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
       this.messageError = error.message || 'Error sending message';
 
       // Restauramos el texto en el input
-      this.messageText = texto;
+      this.messageText = text;
     } finally {
       this.sendingMessage = false;
     }
@@ -171,7 +171,7 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
   async logout(): Promise<void> {
     try {
       // Limpiamos el chat local
-      // this.chatService.limpiarChat();
+      this.chatService.clearChat();
 
       // Cerramos sesión en Firebase
       await this.authService.logout();
