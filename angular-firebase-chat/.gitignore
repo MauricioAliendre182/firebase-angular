@@ -44,3 +44,6 @@ Thumbs.db
 
 # Environment files
 /src/environments/*.ts
+
+./firebase-debug.log
+./firebase-errors.log
