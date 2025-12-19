@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { Gemini } from './gemini';
+import { Gemini } from './openai';
 
 describe('Gemini', () => {
   let service: Gemini;

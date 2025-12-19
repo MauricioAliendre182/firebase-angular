@@ -52,6 +52,7 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
   async ngOnInit(): Promise<void> {
     try {
       await this.verificarAutenticacion();
+      this.verifyChatIsReady();
       await this.startChat();
       this.configureSubscriptions();
     } catch (error) {
@@ -91,6 +92,12 @@ export class Chat implements OnInit, OnDestroy, AfterViewChecked {
     if (!this.user) {
       await this.router.navigate(['/auth']);
       throw new Error('User not authenticated');
+    }
+  }
+
+  private verifyChatIsReady(): void {
+    if (!this.chatService.isChatReady()) {
+      throw new Error('Chat is not initialized properly');
     }
   }
 

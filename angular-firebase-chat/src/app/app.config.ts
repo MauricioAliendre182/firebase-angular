@@ -7,7 +7,7 @@ import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 
-import { envrionment } from '../environments/environment.prod';
+import { environment } from '../environments/environment.prod';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -18,7 +18,7 @@ export const appConfig: ApplicationConfig = {
     // this function will contain our env variables
     // This is to use the DB Firebase services
     provideFirebaseApp(() => {
-      return initializeApp(envrionment.firebaseConfig);
+      return initializeApp(environment.firebaseConfig);
     }),
     // provideAuth is to use the Firebase Auth services
     // We need to pass a function that initializes the Auth service

@@ -1,17 +1,18 @@
 import { inject, Injectable } from '@angular/core';
 import { ChatMessage } from '../models/chat';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
 import { AuthService } from './auth';
 import { FirestoreService } from './firestore';
+import { OpenAIService } from './openai';
 
 const firestoreServiceMock = {
   getUserMessages: (userId: string) => of([]),
   saveMessage: async (message: ChatMessage) => Promise.resolve(),
 };
 
-const geminiServiceMock = {
-  convertHistoryToGemini: (history: ChatMessage[]) => history,
-  sendMessage: async (content: string, history: any) => 'Mocked response from Gemini API',
+const openaiServiceMock = {
+  convertHistoryToOpenAI: (history: ChatMessage[]) => history,
+  sendMessage: async (content: string, history: any) => 'Mocked response from OpenAI API',
 };
 
 @Injectable({
@@ -20,9 +21,7 @@ const geminiServiceMock = {
 export class ChatService {
   private authService = inject(AuthService);
   private firestoreService = inject(FirestoreService);
-
-  // Todavía no implementados:
-  // private geminiService = inject(GeminiService);
+  private openaiService = inject(OpenAIService);
 
   // BehaviorSubject para mantener la lista de mensajes del chat actual
   // BehaviorSubject siempre tiene un valor inicial y emite el último valor a nuevos suscriptores
@@ -129,47 +128,49 @@ export class ChatService {
       // Obtenemos el historial actual para dar contexto a ChatGPT
       const currentMessages = this.subjectMessages.value;
 
-      // Convertimos nuestro historial al formato que espera Gemini
+      // Convertimos nuestro historial al formato que espera OpenAI
       // Solo tomamos los últimos 6 mensajes para no exceder límites de tokens
       // Esto deja más espacio para respuestas más completas
 
-      // const geminiHistory = this.geminiService.convertirHistorialAGemini(
-      //   mensajesActuales.slice(-6)
-      // );
-
-      // This is the mocked version
-      const geminiHistory = geminiServiceMock.convertHistoryToGemini(
+      const openaiHistory = this.openaiService.convertHistoryToOpenAI(
         currentMessages.slice(-6)
       );
 
-      // Enviamos el mensaje a ChatGPT y esperamos la respuesta (usando mock)
-      // const assistantResponse = await firstValueFrom(
-      //   this.geminiService.enviarMensaje(contenidoMensaje, historialParaGemini)
+      // This is the mocked version
+      // const openaiHistory = openaiServiceMock.convertHistoryToOpenAI(
+      //   currentMessages.slice(-6)
       // );
 
-      // THis is the mocked version
-      const assistantResponse = await geminiServiceMock.sendMessage(
-        messageContent,
-        geminiHistory
+      // Enviamos el mensaje a OpenAI y esperamos la respuesta
+      // firstValueFrom is to convert Observable to Promise
+      // For example, if the service returns an Observable<string>, we can use firstValueFrom to get the string value
+      const assistantResponse = await firstValueFrom(
+        this.openaiService.sendMessage(messageContent, openaiHistory)
       );
 
-      // Creamos el mensaje con la respuesta del asistente
-      // const mensajeAsistente: MensajeChat = {
-      //   usuarioId: usuarioActual.uid,
-      //   contenido: respuestaAsistente,
-      //   fechaEnvio: new Date(),
-      //   tipo: 'asistente',
-      //   estado: 'enviado'
-      // };
+      // THis is the mocked version
+      // const assistantResponse = await openaiServiceMock.sendMessage(
+      //   messageContent,
+      //   openaiHistory
+      // );
 
-      // POR AHORA, como no tenemos Gemini implementado, usamos un mock
+      // Creamos el mensaje con la respuesta del asistente
       const assistantMessage: ChatMessage = {
         userId: currentUser.uid,
         content: assistantResponse,
         sentAt: new Date(),
         type: 'assistant',
-        status: 'sent',
+        status: 'sent'
       };
+
+      // POR AHORA, como no tenemos OpenAI implementado, usamos un mock
+      // const assistantMessage: ChatMessage = {
+      //   userId: currentUser.uid,
+      //   content: assistantResponse,
+      //   sentAt: new Date(),
+      //   type: 'assistant',
+      //   status: 'sent',
+      // };
 
       // PRIMERO mostramos la respuesta en la UI inmediatamente
       const updatedMessages = this.subjectMessages.value;
@@ -177,7 +178,7 @@ export class ChatService {
       const newMessages2 = [...updatedMessages, assistantMessage];
       this.subjectMessages.next(newMessages2);
 
-      // DESPUÉS intentamos guardar en Firestore ya con la respuesta de Gemini incluida (en background)
+      // DESPUÉS intentamos guardar en Firestore ya con la respuesta de OpenAI incluida (en background)
       try {
         // This is the real service call
         await this.firestoreService.saveMessage(assistantMessage);
@@ -227,11 +228,11 @@ export class ChatService {
 
   isChatReady(): boolean {
     const userAuthenticated = !!this.authService.getCurrentUser();
-    // const geminiConfigured = this.geminiService.checkConfiguration();
+    const openaiConfigured = this.openaiService.verifyConfiguration();
 
-    // Por ahora, como no tenemos Gemini implementado, asumimos que siempre está configurado
-    const geminiConfigured = true;
+    // Por ahora, como no tenemos OpenAI implementado, asumimos que siempre está configurado
+    // const openaiConfigured = true;
 
-    return userAuthenticated && geminiConfigured;
+    return userAuthenticated && openaiConfigured;
   }
 }
